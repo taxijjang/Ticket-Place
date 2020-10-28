@@ -9,14 +9,15 @@ def get_movie_list():
     '''
         영화 리스트 반환
         TODO:: pagination을 이용하여 리스트 짤라서 응답하도록 하기
-    :return: 영화 리스트
+        TODO:: response format 설정
+        :return: 영화 리스트
     '''
 
     movie_list = current_app.database.execute(text("""
         SELECT movieCd, movieNm, movieNmEn, openDt, genreAlt, nationAlt FROM movies ORDER BY movieCd
     """)).fetchall()
 
-    return [{
+    data = [{
         'movieCd': movie['movieCd'],
         'movieNm': movie['movieNm'],
         'movieNmEn': movie['movieNmEn'],
@@ -24,6 +25,34 @@ def get_movie_list():
         'genreAlt': movie['genreAlt'],
         'nationAlt': movie['nationAlt']
     } for movie in movie_list]
+
+    return data
+
+def get_movie_detail(movie_cd):
+    '''
+        특정 영화 검색
+        TODO:: response format 설정
+        :return: 특정 영화 데이터
+    '''
+
+    movie = current_app.database.execute(text("""
+        SELECT movieCd, movieNm, movieNmEn, prdtYear, openDt, typeNm, prdtStatNm, nationAlt, genreAlt \
+        FROM movies WHERE movieCd = :movie_cd
+    """), {'movie_cd': movie_cd}).fetchone()
+
+    data = {
+        'movieCd': movie['movieCd'],
+        'movieNm': movie['movieNm'],
+        'movieNmEn': movie['movieNmEn'],
+        'prdtYear': movie['prdtYear'],
+        'openDt': movie['openDt'],
+        'typeNm': movie['typeNm'],
+        'prdtStatNm': movie['prdtStatNm'],
+        'nationAlt': movie['nationAlt'],
+        'genreAlt': movie['genreAlt'],
+    }
+
+    return data
 
 
 def create_app(test_config=None):
@@ -43,8 +72,18 @@ def create_app(test_config=None):
 
     @app.route('/movies', methods=['GET'])
     def movie_list():
-        return jsonify({
-            'movies': get_movie_list()
-        })
+        return jsonify(
+            {
+                'movies': get_movie_list()
+            }
+        )
+
+    @app.route('/movies/<int:movie_cd>', methods=['GET'])
+    def movie_detail(movie_cd):
+        return jsonify(
+            {
+                'data': get_movie_detail(str(movie_cd))
+            }
+        )
 
     return app
