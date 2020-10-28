@@ -79,6 +79,7 @@ def create_app(test_config=None):
             }
         )
 
+
     @app.route('/movies/<int:movie_cd>', methods=['GET'])
     def movie_detail(movie_cd):
         return jsonify(
