@@ -12,7 +12,6 @@ conn = pymysql.connect(host='wisestudy.cinqw7ouyrxc.ap-northeast-2.rds.amazonaws
 
 cur = conn.cursor()
 
-
 page_cnt = 0
 while True:
     page_cnt += 1
@@ -23,7 +22,7 @@ while True:
     movies = output['movieListResult']['movieList']
     movies_totCnt = output['movieListResult']['totCnt']
 
-    if movies_totCnt == 0 :
+    if movies_totCnt == 0:
         break
 
     for movie in movies:
@@ -52,7 +51,7 @@ while True:
 
         for company in movie['companys']:
             print(company)
-            sql = f"INSERT INTO `companys` (movieCd, companyCd, companyNm) VALUES ('{movie['movieCd']}', '{company['companyCd']}', '{company['companyNm']}'); "
+            sql = f"INSERT INTO `companys` (movieCd, companyNm) VALUES ('{movie['movieCd']}', '{company['companyNm']}'); "
 
             try:
                 cur.execute(sql)
