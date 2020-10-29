@@ -12,7 +12,7 @@ def get_movie_list():
     '''
         영화 리스트 반환
         TODO:: pagination을 이용하여 리스트 짤라서 응답하도록 하기
-        TODO:: response format 설정
+        TODO:: 예외처리 작업
         :return: 영화 리스트
     '''
 
@@ -35,7 +35,7 @@ def get_movie_list():
 def get_movie_detail(movie_cd):
     '''
         특정 영화 검색
-        TODO:: response format 설정
+        TODO:: 예외처리 작업
         :return: 특정 영화 데이터
     '''
 
@@ -78,6 +78,7 @@ def get_movie_detail(movie_cd):
 def insert_movie(movie_data):
     '''
         특정 영화등록
+        TODO:: 예외처리 작업
     '''
     current_app.database.execute(text("""
         INSERT INTO movies (
@@ -108,6 +109,19 @@ def insert_movie(movie_data):
             """), {'movieCd': movie_data['movieCd'], 'companyNm': company}).rowcount
 
     return True
+
+
+def erase_movie(movie_cd):
+    '''
+        특정 영화 제거
+        TODO:: 예외처리 작업
+        :param movie_cd: 영화 code
+
+    '''
+
+    current_app.database.execute(text("""
+        DELETE FROM movies WHERE movieCd = :movieCd
+    """), movie_cd)
 
 
 def create_app(test_config=None):
@@ -145,6 +159,12 @@ def create_app(test_config=None):
         new_movie = request.json
         insert_movie(new_movie)
 
-        return response(status='NORMAL', message='NORMAL', data='')
+        return response(status='NORMAL', message='NORMAL', data=[])
+
+    @app.route('/movies', methods=['DELETE'])
+    def movie_delete():
+        movie_cd = request.json
+        erase_movie(movie_cd)
+        return response(status='NORMAL', message='NORMAL', data=[])
 
     return app
