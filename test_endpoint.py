@@ -73,7 +73,7 @@ def test_movie_list(api):
     response = api.get('/movies')
     movie_list = json.loads(response.data.decode('utf-8'))
 
-    # status 상태 확인
+    # status 상태 확인:
     assert response.status_code == 200
 
     assert movie_list == {
