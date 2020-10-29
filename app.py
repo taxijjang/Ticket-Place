@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify, current_app, Response, g
+from flask import Flask, request, current_app, Response
 from flask.json import JSONEncoder
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 from functools import wraps
 
 import json
+from response import Response
 
 
 def get_movie_list():
@@ -68,7 +69,7 @@ def get_movie_detail(movie_cd):
         'nationAlt': movie_data['nationAlt'],
         'genreAlt': movie_data['genreAlt'],
         'directors': directors,
-        'companys' : companys,
+        'companys': companys,
     }
 
     return data
@@ -78,7 +79,6 @@ def insert_movie(movie_data):
     '''
         특정 영화등록
     '''
-
     current_app.database.execute(text("""
         INSERT INTO movies (
             movieCd, movieNm, movieNmEn, prdtYear, openDt, typeNm, prdtStatNm, nationAlt, genreAlt
@@ -113,6 +113,7 @@ def insert_movie(movie_data):
 def create_app(test_config=None):
     app = Flask(__name__)
     app.run(debug=True)
+    response = Response()
     if test_config is None:
         app.config.from_pyfile("config.py")
     else:
@@ -123,29 +124,27 @@ def create_app(test_config=None):
 
     @app.route('/ping', methods=['GET'])
     def ping():
-        return "pong", 200
+        data = "pong"
+        return response(status="NORMAL", message='NORMAL', data=data)
 
     @app.route('/movies', methods=['GET'])
     def movie_list():
-        return jsonify(
-            {
-                'movies': get_movie_list()
-            }
-        )
+        data = {
+            'movies': get_movie_list()
+        }
+
+        return response(status='NORMAL', message='NORMAL', data=data)
 
     @app.route('/movies/<int:movie_cd>', methods=['GET'])
     def movie_detail(movie_cd):
-        return jsonify(
-            {
-                'data': get_movie_detail(str(movie_cd))
-            }
-        )
+        data = get_movie_detail(str(movie_cd))
+        return response(status='NORMAL', message='NORMAL', data=data)
 
     @app.route('/movies', methods=['POST'])
     def movie_post():
         new_movie = request.json
         insert_movie(new_movie)
 
-        return '', 200
+        return response(status='NORMAL', message='NORMAL', data='')
 
     return app
