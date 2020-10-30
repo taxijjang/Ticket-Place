@@ -29,9 +29,9 @@ while True:
         if len(movie['movieNmEn']) == 0 or "성인물(에로)" in movie['genreAlt'] or "멜로/로맨스" in movie['genreAlt']:
             continue
 
-        sql = f"INSERT INTO `movies` (movieCd, movieNm, movieNmEn, prdtYear, openDt,typeNm,prdtStatNm,nationAlt, genreAlt,repNationNm, repGenreNm)\
+        sql = f"INSERT INTO `movies` (movieCd, movieNm, movieNmEn, prdtYear, openDt,typeNm,prdtStatNm,nationAlt, genreAlt)\
                   VALUES('{movie['movieCd']}', '{movie['movieNm']}','{movie['movieNmEn']}','{movie['prdtYear']}','{movie['openDt']}',\
-                 '{movie['typeNm']}','{movie['prdtStatNm']}','{movie['nationAlt']}', '{movie['genreAlt']}','{movie['repNationNm']}','{movie['repGenreNm']}') ; "
+                 '{movie['typeNm']}','{movie['prdtStatNm']}','{movie['nationAlt']}', '{movie['genreAlt']}') ; "
         try:
             cur.execute(sql)
             conn.commit()
