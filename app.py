@@ -113,12 +113,52 @@ def insert_movie(movie_data):
                     )
                 """), {'movieCd': movie_data['movieCd'], 'companyNm': company}).rowcount
 
+        return 'CREATE', movie_data
+
+    except Exception as ex:
+        ## DB CONFLICT
+        if ex.code == 'gkpj':
+            return 'CONFLICT', 'None'
+        return 'NOT_FOUND', 'None'
+
+
+def update_movie(movie_data):
+    print("update movie 들어옴")
+    '''
+        특정 영화 데이터 변경
+        :param movie_data: 변경할 영화 데이터
+    '''
+    try:
+        print(movie_data)
+        current_app.database.execute(text("""
+            UPDATE movies SET movieNm = :movieNm, movieNmEn = :movieNmEn, 
+            prdtYear = :prdtYear, openDt = :openDt, typeNm = :typeNm, 
+            prdtStatNm = :prdtStatNm, nationAlt = :nationAlt, genreAlt = :genreAlt
+            WHERE movieCd = :movieCd LIMIT 1
+        """), movie_data).rowcount
+
+        print("movie 변경 완료")
+        print(movie_data['directors'])
+        if len(movie_data['directors']) > 0:
+            for director in movie_data['directors']:
+                current_app.database.execute(text("""
+                    UPDATE directors SET peopleNm = :peopleNm WHERE id = :id AND movieCd = :movieCd LIMIT 1
+                """), {'movieCd': movie_data['movieCd'], 'id': director['id'], 'peopleNm': director['peopleNm']}).rowcount
+            print("director 변경 완료")
+
+
+
+        if len(movie_data['companys']) > 0:
+            for company in movie_data['companys']:
+                current_app.database.execute(text("""
+                    UPDATE companys SET companyNm = :companyNm WHERE id = :id AND movieCd = :movieCd LIMIT 1
+                """), {'movieCd': movie_data['movieCd'], 'id': company['id'], 'companyNm': company['companyNm']})
+            print("companys 변경 완료")
+
         return 'NORMAL', movie_data
 
     except Exception as ex:
         return ex, 'None'
-
-    return None
 
 def erase_movie(movie_cd):
     '''
@@ -135,7 +175,7 @@ def erase_movie(movie_cd):
 
         return 'NORMAL', movie_cd
     except Exception as ex:
-        return ex
+        return ex, 'None'
 
 
 def create_app(test_config=None):
@@ -171,6 +211,12 @@ def create_app(test_config=None):
 
             return response(status=status, data=data)
 
+        elif request.method == 'PUT':
+            modify_movie = request.json
+            status, data = update_movie(modify_movie)
+
+            return response(status=status, data=data)
+
     @app.route('/movies/<int:movie_cd>', methods=['GET', 'DELETE'])
     def movie_detail(movie_cd):
         if request.method == 'GET':
@@ -181,5 +227,4 @@ def create_app(test_config=None):
             status, data = erase_movie(str(movie_cd))
             return response(status=status, data=data)
 
-    # @app.route('/movies')
     return app
