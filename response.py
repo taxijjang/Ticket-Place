@@ -9,12 +9,13 @@ class Response:
             'BAD_REQUEST': 400,
             'UNAUTHORIZED': 401,
             'FORBIDDEN': 403,
-            'NOT_FOUND': 404,  # Server
+            'NOT_FOUND': 404,
+            'CONFLICT': 409,
             'TOO_MANY_REQUEST': 429,
             'INTERNAL_SERVER_ERROR': 500,  # Server
         }
 
-        self.RESPONSE_MESSAGE = {value: key for key, value in self.RESPONSE_STATUS.items() }
+        self.RESPONSE_MESSAGE = {value: key for key, value in self.RESPONSE_STATUS.items()}
 
     def __call__(self, status=200, message=0, data=None, unit_test=False):
         '''
@@ -26,7 +27,6 @@ class Response:
         '''
 
         content = dict()
-
 
         if data:
             content['data'] = data
