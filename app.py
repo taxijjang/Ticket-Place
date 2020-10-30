@@ -39,40 +39,44 @@ def get_movie_detail(movie_cd):
         :return: 특정 영화 데이터
     '''
 
-    movie_data = current_app.database.execute(text("""
-        SELECT movieCd, movieNm, movieNmEn, prdtYear, openDt, typeNm, prdtStatNm, nationAlt, genreAlt \
-        FROM movies WHERE movieCd = :movie_cd
-    """), {'movie_cd': movie_cd}).fetchone()
+    try:
+        movie_data = current_app.database.execute(text("""
+            SELECT movieCd, movieNm, movieNmEn, prdtYear, openDt, typeNm, prdtStatNm, nationAlt, genreAlt \
+            FROM movies WHERE movieCd = :movie_cd
+        """), {'movie_cd': movie_cd}).fetchone()
 
-    diretors_data = current_app.database.execute(text("""
-        SELECT d.id, d.movieCd, d.peopleNm FROM directors AS d 
-        LEFT JOIN movies AS m ON d.movieCd = :movieCd WHERE d.movieCd = m.movieCd
-    """), {'movieCd': movie_data['movieCd']}).fetchall()
+        diretors_data = current_app.database.execute(text("""
+            SELECT d.id, d.movieCd, d.peopleNm FROM directors AS d 
+            LEFT JOIN movies AS m ON d.movieCd = :movieCd WHERE d.movieCd = m.movieCd
+        """), {'movieCd': movie_data['movieCd']}).fetchall()
 
-    directors = [director[2] for director in diretors_data]
+        directors = [director[2] for director in diretors_data]
 
-    companys_data = current_app.database.execute(text("""
-        SELECT c.id, c.movieCd, c.companyNm FROM companys AS c 
-        LEFT JOIN movies AS m ON c.movieCd = :movieCd WHERE c.movieCd = m.movieCd
-    """), {'movieCd': movie_data['movieCd']}).fetchall()
+        companys_data = current_app.database.execute(text("""
+            SELECT c.id, c.movieCd, c.companyNm FROM companys AS c 
+            LEFT JOIN movies AS m ON c.movieCd = :movieCd WHERE c.movieCd = m.movieCd
+        """), {'movieCd': movie_data['movieCd']}).fetchall()
 
-    companys = [company[2] for company in companys_data]
+        companys = [company[2] for company in companys_data]
 
-    data = {
-        'movieCd': movie_data['movieCd'],
-        'movieNm': movie_data['movieNm'],
-        'movieNmEn': movie_data['movieNmEn'],
-        'prdtYear': movie_data['prdtYear'],
-        'openDt': movie_data['openDt'],
-        'typeNm': movie_data['typeNm'],
-        'prdtStatNm': movie_data['prdtStatNm'],
-        'nationAlt': movie_data['nationAlt'],
-        'genreAlt': movie_data['genreAlt'],
-        'directors': directors,
-        'companys': companys,
-    }
+        data = {
+            'movieCd': movie_data['movieCd'],
+            'movieNm': movie_data['movieNm'],
+            'movieNmEn': movie_data['movieNmEn'],
+            'prdtYear': movie_data['prdtYear'],
+            'openDt': movie_data['openDt'],
+            'typeNm': movie_data['typeNm'],
+            'prdtStatNm': movie_data['prdtStatNm'],
+            'nationAlt': movie_data['nationAlt'],
+            'genreAlt': movie_data['genreAlt'],
+            'directors': directors,
+            'companys': companys,
+        }
 
-    return data
+        return 'NORMAL', data
+
+    except Exception as ex:
+        return ex, 'None'
 
 
 def insert_movie(movie_data):
@@ -121,12 +125,11 @@ def erase_movie(movie_cd):
 
     current_app.database.execute(text("""
         DELETE FROM movies WHERE movieCd = :movieCd
-    """), movie_cd)
+    """), {'movieCd': movie_cd})
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    app.run(debug=True)
     response = Response()
     if test_config is None:
         app.config.from_pyfile("config.py")
@@ -139,7 +142,7 @@ def create_app(test_config=None):
     @app.route('/ping', methods=['GET'])
     def ping():
         data = "pong"
-        return response(status="NORMAL", message='NORMAL', data=data)
+        return response(status="NORMAL", data=data)
 
     @app.route('/movies', methods=['GET'])
     def movie_list():
@@ -147,24 +150,24 @@ def create_app(test_config=None):
             'movies': get_movie_list()
         }
 
-        return response(status='NORMAL', message='NORMAL', data=data)
+        return response(status='NORMAL', data=data)
 
     @app.route('/movies/<int:movie_cd>', methods=['GET'])
     def movie_detail(movie_cd):
-        data = get_movie_detail(str(movie_cd))
-        return response(status='NORMAL', message='NORMAL', data=data)
+        status, data = get_movie_detail(str(movie_cd))
+        return response(status=status, data=data)
 
     @app.route('/movies', methods=['POST'])
     def movie_post():
         new_movie = request.json
         insert_movie(new_movie)
 
-        return response(status='NORMAL', message='NORMAL', data=[])
+        return response(status='CREATE', data=new_movie)
 
-    @app.route('/movies', methods=['DELETE'])
-    def movie_delete():
-        movie_cd = request.json
-        erase_movie(movie_cd)
-        return response(status='NORMAL', message='NORMAL', data=[])
+    @app.route('/movies/<int:movie_cd>', methods=['DELETE'])
+    def movie_delete(movie_cd):
+        erase_movie(str(movie_cd))
+        return response(status='NORMAL', data=str(movie_cd))
 
-    return app
+    #@app.route('/movies')
+    #return app
