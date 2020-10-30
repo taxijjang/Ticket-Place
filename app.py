@@ -50,14 +50,14 @@ def get_movie_detail(movie_cd):
             LEFT JOIN movies AS m ON d.movieCd = :movieCd WHERE d.movieCd = m.movieCd
         """), {'movieCd': movie_data['movieCd']}).fetchall()
 
-        directors = [director[2] for director in diretors_data]
+        directors = [{'id': director[0], 'name': director[2]} for director in diretors_data]
 
         companys_data = current_app.database.execute(text("""
             SELECT c.id, c.movieCd, c.companyNm FROM companys AS c 
             LEFT JOIN movies AS m ON c.movieCd = :movieCd WHERE c.movieCd = m.movieCd
         """), {'movieCd': movie_data['movieCd']}).fetchall()
 
-        companys = [company[2] for company in companys_data]
+        companys = [{'id': company[0], 'name': company[2]} for company in companys_data]
 
         data = {
             'movieCd': movie_data['movieCd'],
@@ -76,7 +76,7 @@ def get_movie_detail(movie_cd):
         return 'NORMAL', data
 
     except Exception as ex:
-        return ex, 'None'
+        return 'NOT_FOUND', 'None'
 
 
 def insert_movie(movie_data):
@@ -84,36 +84,41 @@ def insert_movie(movie_data):
         특정 영화등록
         TODO:: 예외처리 작업
     '''
-    current_app.database.execute(text("""
-        INSERT INTO movies (
-            movieCd, movieNm, movieNmEn, prdtYear, openDt, typeNm, prdtStatNm, nationAlt, genreAlt
-        ) VALUES(
-            :movieCd, :movieNm, :movieNmEn, :prdtYear, :openDt, :typeNm, :prdtStatNm, :nationAlt, :genreAlt
-        )
-    """), movie_data).rowcount
+    try:
+        current_app.database.execute(text("""
+            INSERT INTO movies (
+                movieCd, movieNm, movieNmEn, prdtYear, openDt, typeNm, prdtStatNm, nationAlt, genreAlt
+            ) VALUES(
+                :movieCd, :movieNm, :movieNmEn, :prdtYear, :openDt, :typeNm, :prdtStatNm, :nationAlt, :genreAlt
+            )
+        """), movie_data).rowcount
 
-    if len(movie_data['directors']) > 0:
-        for director in movie_data['directors']:
-            current_app.database.execute(text("""
-                INSERT INTO directors(
-                    movieCd, peopleNm
-                ) VALUES (
-                    :movieCd, :peopleNm
-                )
-            """), {'movieCd': movie_data['movieCd'], 'peopleNm': director}).rowcount
+        if len(movie_data['directors']) > 0:
+            for director in movie_data['directors']:
+                current_app.database.execute(text("""
+                    INSERT INTO directors(
+                        movieCd, peopleNm
+                    ) VALUES (
+                        :movieCd, :peopleNm
+                    )
+                """), {'movieCd': movie_data['movieCd'], 'peopleNm': director}).rowcount
 
-    if len(movie_data['companys']) > 0:
-        for company in movie_data['companys']:
-            current_app.database.execute(text("""
-                INSERT INTO companys(
-                    movieCd, companyNm
-                ) VALUES (
-                    :movieCd, :companyNm
-                )
-            """), {'movieCd': movie_data['movieCd'], 'companyNm': company}).rowcount
+        if len(movie_data['companys']) > 0:
+            for company in movie_data['companys']:
+                current_app.database.execute(text("""
+                    INSERT INTO companys(
+                        movieCd, companyNm
+                    ) VALUES (
+                        :movieCd, :companyNm
+                    )
+                """), {'movieCd': movie_data['movieCd'], 'companyNm': company}).rowcount
 
-    return True
+        return 'NORMAL', movie_data
 
+    except Exception as ex:
+        return ex, 'None'
+
+    return None
 
 def erase_movie(movie_cd):
     '''
@@ -123,14 +128,20 @@ def erase_movie(movie_cd):
 
     '''
 
-    current_app.database.execute(text("""
-        DELETE FROM movies WHERE movieCd = :movieCd
-    """), {'movieCd': movie_cd})
+    try:
+        current_app.database.execute(text("""
+            DELETE FROM movies WHERE movieCd = :movieCd
+        """), {'movieCd': movie_cd})
+
+        return 'NORMAL', movie_cd
+    except Exception as ex:
+        return ex
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
     response = Response()
+
     if test_config is None:
         app.config.from_pyfile("config.py")
     else:
@@ -144,30 +155,31 @@ def create_app(test_config=None):
         data = "pong"
         return response(status="NORMAL", data=data)
 
-    @app.route('/movies', methods=['GET'])
+    @app.route('/movies', methods=['GET', 'POST', 'PUT'])
     def movie_list():
-        data = {
-            'movies': get_movie_list()
-        }
 
-        return response(status='NORMAL', data=data)
+        if request.method == 'GET':
+            data = {
+                'movies': get_movie_list()
+            }
 
-    @app.route('/movies/<int:movie_cd>', methods=['GET'])
+            return response(status='NORMAL', data=data)
+
+        elif request.method == 'POST':
+            new_movie = request.json
+            status, data = insert_movie(new_movie)
+
+            return response(status=status, data=data)
+
+    @app.route('/movies/<int:movie_cd>', methods=['GET', 'DELETE'])
     def movie_detail(movie_cd):
-        status, data = get_movie_detail(str(movie_cd))
-        return response(status=status, data=data)
+        if request.method == 'GET':
+            status, data = get_movie_detail(str(movie_cd))
+            return response(status=status, data=data)
 
-    @app.route('/movies', methods=['POST'])
-    def movie_post():
-        new_movie = request.json
-        insert_movie(new_movie)
+        elif request.method == 'DELETE':
+            status, data = erase_movie(str(movie_cd))
+            return response(status=status, data=data)
 
-        return response(status='CREATE', data=new_movie)
-
-    @app.route('/movies/<int:movie_cd>', methods=['DELETE'])
-    def movie_delete(movie_cd):
-        erase_movie(str(movie_cd))
-        return response(status='NORMAL', data=str(movie_cd))
-
-    #@app.route('/movies')
-    #return app
+    # @app.route('/movies')
+    return app

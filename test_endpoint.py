@@ -100,24 +100,31 @@ def test_movie_detail(api):
     assert api_response.status_code == 200
 
     data = {
-        'companys': ['테스트 컴패니'], 'directors': ['테스트 디렉터'], 'genreAlt': '테스트',
+        'companys': [{'id': 1, 'name': '테스트 컴패니'}], 'directors': [{'id': 1, 'name': '테스트 디렉터'}], 'genreAlt': '테스트',
         'movieCd': '1', 'movieNm': '테스트', 'movieNmEn': 'TEST', 'nationAlt': '테스트',
         'openDt': '20200101', 'prdtStatNm': '테스트', 'prdtYear': '2020', 'typeNm': '장편'
     }
 
     assert payload == response(status='NORMAL', data=data, unit_test=True)
 
+    ## 없는 데이터 조회 했을때
+    api_response = api.get('/movies/2')
+    payload = json.loads(api_response.data.decode('utf-8'))
+
+    assert api_response.status_code == 200
+    assert payload == response(status='NOT_FOUND', data='None', unit_test=True)
+
 
 def test_movie_insert(api):
     response = Response()
-    data = {
-        'companys': ['카카오', '토스'], 'directors': ['김택윤', '이운기'],'genreAlt': '테스트','movieCd': '2',
+    request_data = {
+        'companys': ['카카오', '토스'], 'directors': ['김택윤', '이운기'], 'genreAlt': '테스트', 'movieCd': '2',
         'movieNm': '포스트테스트', 'movieNmEn': 'POSTTEST', 'nationAlt': '테스트', 'openDt': '20200101',
-        'prdtStatNm': '테스트','prdtYear': '2020','typeNm': '장편',
+        'prdtStatNm': '테스트', 'prdtYear': '2020', 'typeNm': '장편',
     }
     api_response = api.post(
         '/movies',
-        data=json.dumps(data),
+        data=json.dumps(request_data),
         content_type="application/json"
     )
 
@@ -126,12 +133,20 @@ def test_movie_insert(api):
     api_response = api.get(
         '/movies/2'
     )
-    payload = json.loads(api_response.data.decode('utf-8'), strict=False)
-    payload = {key:value for key, value in dict(payload).items()}
+    payload = json.loads(api_response.data.decode('utf-8'))
+    payload = {key: value for key, value in dict(payload).items()}
 
     assert api_response.status_code == 200
 
-    assert payload == response(status='NORMAL', data=data, unit_test=True)
+    response_data = {
+        'companys': [{'id': 2, 'name': '카카오'}, {'id': 3, 'name': '토스'}],
+        'directors': [{'id': 2, 'name': '김택윤'}, {'id': 3, 'name': '이운기'}],
+        'genreAlt': '테스트', 'movieCd': '2', 'movieNm': '포스트테스트', 'movieNmEn': 'POSTTEST',
+        'nationAlt': '테스트', 'openDt': '20200101', 'prdtStatNm': '테스트', 'prdtYear': '2020', 'typeNm': '장편'
+    }
+
+    assert payload == response(status='NORMAL', data=response_data, unit_test=True)
+
 
 def test_movie_delete(api):
     response = Response()
@@ -146,9 +161,9 @@ def test_movie_delete(api):
     )
 
     payload = json.loads(api_response.data.decode('utf-8'))
-    payload = {key:value for key, value in dict(payload).items()}
+    payload = {key: value for key, value in dict(payload).items()}
 
     print(payload)
 
     assert api_response.status_code == 200
-    assert payload == response(status='NOT_FOUND', data= 'None', unit_test=True)
+    assert payload == response(status='NOT_FOUND', data='None', unit_test=True)
