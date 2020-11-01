@@ -2,11 +2,11 @@
 티켓 플레이스 과제
 
 ### API LIST
-- [GET /movies](apidoc/)
-- [GET /movies/{movie_id}]
-- [POST /movies]
-- [PUT /movies]
-- [DELETE /movies/{movie_id}]
+- [GET /movies](apidoc.md#api-list)
+- [GET /movies/{movie_id}](apidoc.md#get-moviesmovie_id)
+- [POST /movies](apidoc.md#post-movies)
+- [PUT /movies](apidoc.md#put-movies)
+- [DELETE /movies/{movie_id}](delete-moviesmovie_id)
 
 ---
 
