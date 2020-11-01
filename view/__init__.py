@@ -32,11 +32,10 @@ def create_endpoints(app, services):
     def movie_list():
         if request.method == 'GET':
             pagination_data = {
-                'page': request.args.get('page', 1),
-                'per_page': request.args.get('per_page', 20),
+                'page': int(request.args.get('page', 1)),
+                'per_page': int(request.args.get('per_page', 20)),
             }
 
-            print(pagination_data['page'], pagination_data['per_page'])
             status, data, pagination = movie_service.get_movie_list(pagination_data)
             return response(status=status, data=data, pagination=pagination)
 

@@ -18,7 +18,6 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     database = create_engine(app.config['DB_URL'], encoding='utf-8', max_overflow=0)
-    print(database)
     ## Persistenace Layer
     movie_dao = MovieDao(database)
 

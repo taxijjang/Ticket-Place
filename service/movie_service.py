@@ -9,6 +9,7 @@ class MovieService:
     def get_movie_list(self, pagination_data):
         status, data, limit = self.movie_dao.get_movie_list(pagination_data)
         pagination = {'page': pagination_data['page'], 'per_page': pagination_data['per_page'], 'limit': limit}
+
         return status, data, pagination
 
     def post_movie_list(self, movie_data):

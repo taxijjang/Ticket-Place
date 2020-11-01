@@ -1,4 +1,3 @@
-from flask import Flask, request, current_app, Response
 from sqlalchemy import text
 
 
@@ -9,39 +8,33 @@ class MovieDao:
     def get_movie_list(self, pagination):
         '''
             영화 리스트 반환
-            TODO:: pagination을 이용하여 리스트 짤라서 응답하도록 하기
-            TODO:: 예외처리 작업
             :return: 영화 리스트
         '''
 
         try:
-            page = pagination['page']
-            per_page = pagination['per_page']
-
-            print("############")
-            print(page, per_page)
+            page: int = pagination['page']
+            per_page: int = pagination['per_page']
 
             movie_list = self.db.execute(text("""
-                SELECT movieCd, movieNm, movieNmEn, openDt, genreAlt, nationAlt FROM movies ORDER BY movieCd LIMIT :page,:per_page
-            """), {'page': (per_page * (page - 1)), 'per_page': per_page}).fetchall()
+                SELECT movieCd, movieNm, movieNmEn, openDt, genreAlt, nationAlt FROM movies
+                 ORDER BY movieCd LIMIT :page,:per_page
+            """),{'page': (per_page * (page - 1)), 'per_page': per_page}).fetchall()
 
-            print(movie_list)
-            data = [{
+            data = {'movies' : [{
                 'movieCd': movie['movieCd'],
                 'movieNm': movie['movieNm'],
                 'movieNmEn': movie['movieNmEn'],
                 'openDt': movie['openDt'],
                 'genreAlt': movie['genreAlt'],
                 'nationAlt': movie['nationAlt']
-            } for movie in movie_list]
+            } for movie in movie_list]}
 
-            limit = self.db.execute(text("""
+            movie_list_count = self.db.execute(text("""
                 SELECT COUNT(1) FROM movies
-            """))
+            """)).fetchone()
 
-            print("@@@@@@@@@@@@@@@@@@")
-            print(page, per_page, limit)
-            return 'NORMAL', data, limit // per_page
+            movie_list_count = movie_list_count[0]
+            return 'NORMAL', data, (movie_list_count // per_page) + 1
 
         except Exception as ex:
             return 'NOT_FOUND', 'None', 0
@@ -49,7 +42,6 @@ class MovieDao:
     def get_movie_detail(self, movie_cd):
         '''
             특정 영화 검색
-            TODO:: 예외처리 작업
             :return: 특정 영화 데이터
         '''
 
