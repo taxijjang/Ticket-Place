@@ -58,3 +58,5 @@ while True:
                 conn.commit()
             except Exception as ex:
                 print(f"company error -> {ex}")
+
+

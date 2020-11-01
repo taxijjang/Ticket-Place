@@ -8,6 +8,20 @@ import json
 from response import Response
 
 
+def content_type(f):
+    @wraps(f)
+    def decorate_function(*args, **kwargs):
+        response = Response()
+        if request.method in ['PUT', 'POST']:
+            content_type = request.headers.get('Content-Type')
+            if str(content_type) != 'application/json':
+                return response(status='NOT_ACCEPTABLE', data='None')
+
+        return f(*args, **kwargs)
+
+    return decorate_function
+
+
 def get_movie_list():
     '''
         영화 리스트 반환
@@ -123,13 +137,11 @@ def insert_movie(movie_data):
 
 
 def update_movie(movie_data):
-    print("update movie 들어옴")
     '''
         특정 영화 데이터 변경
         :param movie_data: 변경할 영화 데이터
     '''
     try:
-        print(movie_data)
         current_app.database.execute(text("""
             UPDATE movies SET movieNm = :movieNm, movieNmEn = :movieNmEn, 
             prdtYear = :prdtYear, openDt = :openDt, typeNm = :typeNm, 
@@ -137,28 +149,24 @@ def update_movie(movie_data):
             WHERE movieCd = :movieCd LIMIT 1
         """), movie_data).rowcount
 
-        print("movie 변경 완료")
-        print(movie_data['directors'])
         if len(movie_data['directors']) > 0:
             for director in movie_data['directors']:
                 current_app.database.execute(text("""
                     UPDATE directors SET peopleNm = :peopleNm WHERE id = :id AND movieCd = :movieCd LIMIT 1
-                """), {'movieCd': movie_data['movieCd'], 'id': director['id'], 'peopleNm': director['peopleNm']}).rowcount
-            print("director 변경 완료")
-
-
+                """), {'movieCd': movie_data['movieCd'], 'id': director['id'],
+                       'peopleNm': director['peopleNm']}).rowcount
 
         if len(movie_data['companys']) > 0:
             for company in movie_data['companys']:
                 current_app.database.execute(text("""
                     UPDATE companys SET companyNm = :companyNm WHERE id = :id AND movieCd = :movieCd LIMIT 1
                 """), {'movieCd': movie_data['movieCd'], 'id': company['id'], 'companyNm': company['companyNm']})
-            print("companys 변경 완료")
 
         return 'NORMAL', movie_data
 
     except Exception as ex:
         return ex, 'None'
+
 
 def erase_movie(movie_cd):
     '''
@@ -196,6 +204,7 @@ def create_app(test_config=None):
         return response(status="NORMAL", data=data)
 
     @app.route('/movies', methods=['GET', 'POST', 'PUT'])
+    @content_type
     def movie_list():
 
         if request.method == 'GET':
@@ -210,6 +219,7 @@ def create_app(test_config=None):
             status, data = insert_movie(new_movie)
 
             return response(status=status, data=data)
+
 
         elif request.method == 'PUT':
             modify_movie = request.json
@@ -226,5 +236,9 @@ def create_app(test_config=None):
         elif request.method == 'DELETE':
             status, data = erase_movie(str(movie_cd))
             return response(status=status, data=data)
+
+    @app.errorhandler(405)
+    def error_handler(error):
+        return response(status='METHOD_NOT_ALLOWED', data='None')
 
     return app
