@@ -37,7 +37,7 @@ class MovieDao:
             return 'NORMAL', data, (movie_list_count // per_page) + 1
 
         except Exception as ex:
-            return 'NOT_FOUND', 'None', 0
+            return 'BAD_REQUEST', 'None', 0
 
     def get_movie_detail(self, movie_cd):
         '''
@@ -82,7 +82,7 @@ class MovieDao:
             return 'NORMAL', data
 
         except Exception as ex:
-            return 'NOT_FOUND', 'None'
+            return 'BAD_REQUEST', 'None'
 
     def insert_movie(self, new_movie_data):
         '''
@@ -123,7 +123,7 @@ class MovieDao:
             ## DB CONFLICT
             if ex.code == 'gkpj':
                 return 'CONFLICT', 'None'
-            return 'NOT_FOUND', 'None'
+            return 'BAD_REQUEST', 'None'
 
     def update_movie(self, movie_data):
         '''
@@ -155,7 +155,7 @@ class MovieDao:
             return 'NORMAL', modify_movie_data
 
         except Exception as ex:
-            return ex, 'None'
+            return 'BAD_REQUEST', 'None'
 
     def erase_movie(self, movie_cd):
         '''
@@ -171,4 +171,4 @@ class MovieDao:
 
             return 'NORMAL', movie_cd
         except Exception as ex:
-            return ex, 'None'
+            return 'BAD_REQUEST', 'None'

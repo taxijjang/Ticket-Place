@@ -2,6 +2,10 @@ from flask import jsonify
 
 
 class Response:
+    '''
+        response format
+    '''
+
     def __init__(self):
         self.RESPONSE_STATUS = {
             'NORMAL': 200,
@@ -10,8 +14,8 @@ class Response:
             'UNAUTHORIZED': 401,
             'FORBIDDEN': 403,
             'NOT_FOUND': 404,
-            'METHOD_NOT_ALLOWED' : 405,
-            'NOT_ACCEPTABLE':406,
+            'METHOD_NOT_ALLOWED': 405,
+            'NOT_ACCEPTABLE': 406,
             'CONFLICT': 409,
             'TOO_MANY_REQUEST': 429,
             'INTERNAL_SERVER_ERROR': 500,  # Server
@@ -19,7 +23,7 @@ class Response:
 
         self.RESPONSE_MESSAGE = {value: key for key, value in self.RESPONSE_STATUS.items()}
 
-    def __call__(self, status=200, message=0, data=None, unit_test=False, pagination= None):
+    def __call__(self, status=200, message=0, data=None, unit_test=False, pagination=None):
         '''
             :param status: 상태
             :param message: 메시지
@@ -35,8 +39,13 @@ class Response:
         if pagination:
             content['pagination'] = pagination
 
-        content['message'] = self.RESPONSE_MESSAGE[self.RESPONSE_STATUS[status]]
-        content['status'] = self.RESPONSE_STATUS[status]
+        try:
+            content['message'] = self.RESPONSE_MESSAGE[self.RESPONSE_STATUS[status]]
+            content['status'] = self.RESPONSE_STATUS[status]
+
+        except Exception as ex:
+            content['message'] = self.RESPONSE_MESSAGE[self.RESPONSE_STATUS['NOT_FOUND']]
+            content['status'] = self.RESPONSE_STATUS['NOT_FOUND']
 
         # unit test X
         if not unit_test:
