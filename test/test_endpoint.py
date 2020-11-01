@@ -2,13 +2,13 @@ import pytest
 import json
 import config
 
-from app import create_app
+from view.app import create_app
 from sqlalchemy import create_engine, text
 
-from response import Response
+from lib.response import Response
 
 database = create_engine(config.test_config['DB_URL'], encoding='UTF-8', max_overflow=0)
-
+print(config.test_config['DB_URL'])
 
 @pytest.fixture
 def api():

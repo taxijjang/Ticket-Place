@@ -28,8 +28,8 @@ test_db = {
 }
 
 test_config = {
-    'DB_URL' : f"mysql+mysqlconnector://{db['user']}:{db['password']}@" \
-             f"{db['host']}:{db['port']}/{db['database']}?charset=utf8"
+    'DB_URL' : f"mysql+mysqlconnector://{test_db['user']}:{test_db['password']}@" \
+             f"{test_db['host']}:{test_db['port']}/{test_db['database']}?charset=utf8"
 }
 
 
