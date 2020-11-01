@@ -19,7 +19,7 @@ class Response:
 
         self.RESPONSE_MESSAGE = {value: key for key, value in self.RESPONSE_STATUS.items()}
 
-    def __call__(self, status=200, message=0, data=None, unit_test=False):
+    def __call__(self, status=200, message=0, data=None, unit_test=False, pagination= None):
         '''
             :param status: 상태
             :param message: 메시지
@@ -32,6 +32,8 @@ class Response:
 
         if data:
             content['data'] = data
+        if pagination:
+            content['pagination'] = pagination
 
         content['message'] = self.RESPONSE_MESSAGE[self.RESPONSE_STATUS[status]]
         content['status'] = self.RESPONSE_STATUS[status]

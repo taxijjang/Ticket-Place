@@ -5,7 +5,7 @@ import config
 from app import create_app
 from sqlalchemy import create_engine, text
 
-from response import Response
+from lib.response import Response
 
 database = create_engine(config.test_config['DB_URL'], encoding='UTF-8', max_overflow=0)
 
@@ -79,6 +79,7 @@ def test_movie_list(api):
     response = Response()
     api_response = api.get('/movies')
     payload = json.loads(api_response.data.decode('utf-8'))
+    payload = {key: value for key, value in dict(payload).items()}
 
     # status 상태 확인:
     assert api_response.status_code == 200
@@ -89,13 +90,17 @@ def test_movie_list(api):
             'movieNmEn': 'TEST', 'nationAlt': '테스트', 'openDt': '20200101'
         }]
     }
-    assert payload == response(status='NORMAL', data=data, unit_test=True)
+
+
+    pagination = {'page': 1, 'per_page': 20, 'limit': 1}
+    assert payload == response(status='NORMAL', data=data, pagination=pagination, unit_test=True)
 
 
 def test_movie_detail(api):
     response = Response()
     api_response = api.get('/movies/1')
     payload = json.loads(api_response.data.decode('utf-8'))
+    payload = {key: value for key, value in dict(payload).items()}
 
     assert api_response.status_code == 200
 
@@ -162,8 +167,6 @@ def test_movie_delete(api):
 
     payload = json.loads(api_response.data.decode('utf-8'))
     payload = {key: value for key, value in dict(payload).items()}
-
-    print(payload)
 
     assert api_response.status_code == 200
     assert payload == response(status='NOT_FOUND', data='None', unit_test=True)
