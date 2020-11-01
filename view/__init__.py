@@ -45,6 +45,7 @@ def create_endpoints(app, services):
             return response(status=status, data=data)
 
         elif request.method == 'PUT':
+            print(request.json)
             modify_movie_data = request.json
             status, data = movie_service.put_movie_list(modify_movie_data)
             return response(status=status, data=data)

@@ -40,7 +40,6 @@ while True:
             print(f"movie error -> {ex}")
 
         for director in movie['directors']:
-            print(director)
             sql = f"INSERT INTO `directors` (movieCd, peopleNm) VALUES ('{movie['movieCd']}', '{director['peopleNm']}'); "
 
             try:
@@ -50,7 +49,6 @@ while True:
                 print(f"director error -> {ex}")
 
         for company in movie['companys']:
-            print(company)
             sql = f"INSERT INTO `companys` (movieCd, companyNm) VALUES ('{movie['movieCd']}', '{company['companyNm']}'); "
 
             try:
