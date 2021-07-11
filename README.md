@@ -18,7 +18,6 @@
 ---
 
 ### 프로젝트 초기화/ 빌드/ 테스트
-g
 ##### 초기화 
 - python 가상환경 생성
 > - python -m venv {가상환경 이름}
@@ -38,25 +37,35 @@ g
 ##### 테스트
 - GET /movie
 
-```curl -X GET http://127.0.0.1:5000/movies```
+```
+curl -X GET http://127.0.0.1:5000/movies
+```
 
 - GET /movie/{movie_id}
 
-```curl -X GET http://127.0.0.1:5000/movies/{movie_id}```
+```
+curl -X GET http://127.0.0.1:5000/movies/{movie_id}
+```
 
 - POST /movie
 
-```curl -X POST -H "Content-Type: application/json" -d "{\"companys\": [\"{companys}\"], \"directors\": [\"{directors}\"], \"genreAlt\": \"{genreAlt}\", \"movieCd\": \"{movieCd}\", \"movieNm\": \"{movieNm}\", \"movieNmEn\": \"{movieNmEn}\", \"nationAlt\": \"{nationAlt}\", \"openDt\": \"{openDt}\", \"prdtStatNm\": \"{prdtStatNm}\", \"prdtYear\": \"{prdtYear}\",\"typeNm\": \"{typeNm}\"}" http://127.0.0.1:5000/movies```
+```
+curl -X POST -H "Content-Type: application/json" -d "{\"companys\": [\"{companys}\"], \"directors\": [\"{directors}\"], \"genreAlt\": \"{genreAlt}\", \"movieCd\": \"{movieCd}\", \"movieNm\": \"{movieNm}\", \"movieNmEn\": \"{movieNmEn}\", \"nationAlt\": \"{nationAlt}\", \"openDt\": \"{openDt}\", \"prdtStatNm\": \"{prdtStatNm}\", \"prdtYear\": \"{prdtYear}\",\"typeNm\": \"{typeNm}\"}" http://127.0.0.1:5000/movies
+```
 
 - PUT /movie
 
-```curl -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -d "{\"companys\": [{\"id\": {id}, \"companyNm\": "\{companyNm}\"}\"}], \"directors\": [{\"id\": {id}}, \"peopleNm\": \"{peopleNm}\"}], \"genreAlt\": \"{genreAlt}\", \"movieCd\": \"{movieCd}\", \"movieNm\": \"{movieNm}\", \"movieNmEn\": \"{movieNmEn}\", \"nationAlt\": \"{nationAlt}\", \"openDt\": \"{openDt}\", \"prdtStatNm\": \"{prdtStatNm}\", \"prdtYear\": \"{prdtYear}\",\"typeNm\": \"{typeNm}\"}" 
 ```
+curl -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -d "{\"companys\": [{\"id\": {id}, \"companyNm\": "\{companyNm}\"}\"}], \"directors\": [{\"id\": {id}}, \"peopleNm\": \"{peopleNm}\"}], \"genreAlt\": \"{genreAlt}\", \"movieCd\": \"{movieCd}\", \"movieNm\": \"{movieNm}\", \"movieNmEn\": \"{movieNmEn}\", \"nationAlt\": \"{nationAlt}\", \"openDt\": \"{openDt}\", \"prdtStatNm\": \"{prdtStatNm}\", \"prdtYear\": \"{prdtYear}\",\"typeNm\": \"{typeNm}\"}" 
+```
+
 http://127.0.0.1:5000/movies 
 
 - DELETE /movie
 
-```curl -X DELETE http://127.0.0.1:5000/movies/{movie_id}```
+```
+curl -X DELETE http://127.0.0.1:5000/movies/{movie_id}
+```
  
 ---
 
